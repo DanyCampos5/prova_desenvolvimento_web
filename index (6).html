@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cálculo de Média por Disciplina</title>
+  <style>
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      background: linear-gradient(to bottom, #4facfe, #00f2fe);
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      width: 400px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #4facfe;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-size: 14px;
+      text-align: left;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    .nota {
+      margin-bottom: 30px; /* Espaçamento maior para campos de nota */
+    }
+
+    button {
+      background-color: #4facfe;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0078d7;
+    }
+
+    #resultado {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    #historico {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    #historico h2 {
+      font-size: 18px;
+      color: #4facfe;
+    }
+
+    #listaHistorico {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #listaHistorico li {
+      background: #f0f4f8;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📘 Calculadora de Média Escolar</h1>
+    <form id="mediaForm">
+      <label for="nome">👤 Nome do Aluno:</label>
+      <input type="text" id="nome" placeholder="Digite o nome do aluno" required>
+
+      <label for="disciplina">📚 Disciplina:</label>
+      <select id="disciplina" required>
+        <option value="">Escolha uma disciplina</option>
+        <option value="Matemática">Matemática</option>
+        <option value="Português">Português</option>
+        <option value="Ciências">Ciências</option>
+        <option value="História">História</option>
+      </select>
+
+      <label for="nota1">✏️ Nota do 1º bimestre:</label>
+      <input type="number" id="nota1" class="nota" step="0.01" min="0" max="100" placeholder="0 a 100" required>
+
+      <label for="nota2">✏️ Nota do 2º bimestre:</label>
+      <input type="number" id="nota2" class="nota" step="0.01" min="0" max="100" placeholder="0 a 100" required>
+
+      <label for="nota3">✏️ Nota do 3º bimestre:</label>
+      <input type="number" id="nota3" class="nota" step="0.01" min="0" max="100" placeholder="0 a 100" required>
+
+      <label for="nota4">✏️ Nota do 4º bimestre:</label>
+      <input type="number" id="nota4" class="nota" step="0.01" min="0" max="100" placeholder="0 a 100" required>
+
+      <div class="buttons">
+        <button type="button" onclick="calcularMedia()">Calcular Média</button>
+        <button type="reset" onclick="limparFormulario()">Limpar</button>
+      </div>
+    </form>
+    <p id="resultado"></p>
+    <div id="historico">
+      <h2>📝 Histórico de Médias</h2>
+      <ul id="listaHistorico"></ul>
+    </div>
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", carregarHistorico);
+
+    function calcularMedia() {
+      const nome = document.getElementById("nome").value.trim();
+      const disciplina = document.getElementById("disciplina").value;
+      const nota1 = parseFloat(document.getElementById("nota1").value) || 0;
+      const nota2 = parseFloat(document.getElementById("nota2").value) || 0;
+      const nota3 = parseFloat(document.getElementById("nota3").value) || 0;
+      const nota4 = parseFloat(document.getElementById("nota4").value) || 0;
+
+      if (!nome || !disciplina) {
+        alert("Por favor, preencha o nome e selecione uma disciplina.");
+        return;
+      }
+
+      const media = (nota1 + nota2 + nota3 + nota4) / 4;
+      const resultado = document.getElementById("resultado");
+
+      const status = media >= 60 ? "Aprovado" : "Reprovado";
+      resultado.textContent = `Média: ${media.toFixed(2)} - ${status}`;
+      resultado.style.color = media >= 60 ? "green" : "red";
+
+      salvarHistorico(nome, disciplina, media.toFixed(2), status);
+      carregarHistorico();
+    }
+
+    function salvarHistorico(nome, disciplina, media, status) {
+      const historico = JSON.parse(localStorage.getItem("historico")) || [];
+      historico.push({ nome, disciplina, media, status });
+      localStorage.setItem("historico", JSON.stringify(historico));
+    }
+
+    function carregarHistorico() {
+      const historico = JSON.parse(localStorage.getItem("historico")) || [];
+      const lista = document.getElementById("listaHistorico");
+      lista.innerHTML = "";
+
+      historico.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.textContent = `Aluno: ${item.nome}, Disciplina: ${item.disciplina}, Média: ${item.media}, Status: ${item.status}`;
+        lista.appendChild(li);
+      });
+    }
+
+    function limparFormulario() {
+      document.getElementById("resultado").textContent = "";
+    }
+  </script>
+</body>
+</html>
